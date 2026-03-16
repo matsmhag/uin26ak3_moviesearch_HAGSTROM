@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import SearchForm from "../components/SearchForm";
 import MovieList from "../components/MovieList";
-import { fetchMovies } from "../utils/api";
+import { fetchMovies, fetchMovieByTitle  } from "../utils/api";
 
 export default function HomePage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -11,27 +11,44 @@ export default function HomePage() {
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    async function getJamesBondMovies() {
-      setIsLoading(true);
-      setErrorMessage("");
+  async function getJamesBondMovies() {
+    setIsLoading(true);
+    setErrorMessage("");
 
-      try {
-        const data = await fetchMovies("james bond");
+    const bondTitles = [
+      "Dr. No",
+      "From Russia with Love",
+      "Goldfinger",
+      "Thunderball",
+      "You Only Live Twice",
+      "Diamonds Are Forever",
+      "Live and Let Die",
+      "The Spy Who Loved Me",
+      "GoldenEye",
+      "Casino Royale",
+    ];
 
-        if (data.Response === "True") {
-          setDefaultMovies(data.Search.slice(0, 10));
-        } else {
-          setErrorMessage("Kunne ikke hente James Bond-filmer.");
-        }
-      } catch (error) {
-        setErrorMessage("Noe gikk galt ved henting av filmer.");
-      } finally {
-        setIsLoading(false);
-      }
+    try {
+      const moviePromises = bondTitles.map((title) =>
+        fetchMovieByTitle(title)
+      );
+
+      const movieData = await Promise.all(moviePromises);
+
+      const validMovies = movieData.filter(
+        (movie) => movie.Response === "True"
+      );
+
+      setDefaultMovies(validMovies);
+    } catch (error) {
+      setErrorMessage("Kunne ikke hente James Bond-filmer.");
+    } finally {
+      setIsLoading(false);
     }
+  }
 
-    getJamesBondMovies();
-  }, []);
+  getJamesBondMovies();
+}, []);
 
   useEffect(() => {
     async function getSearchResults() {
