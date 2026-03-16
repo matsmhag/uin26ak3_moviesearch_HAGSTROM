@@ -18,3 +18,12 @@ export async function fetchMovieById(id) {
   const data = await response.json();
   return data;
 }
+
+export async function fetchMovieByTitle(title) {
+  const response = await fetch(
+    `${BASE_URL}?apikey=${API_KEY}&t=${encodeURIComponent(title)}&plot=full`
+  );
+
+  const data = await response.json();
+  return data;
+}
